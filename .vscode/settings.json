@@ -23,5 +23,6 @@
     ],
     "terminal.integrated.env.windows": {
         "PATH": "${workspaceFolder}/Tools/w64devkit/bin;${env:PATH}"
-    }
+    },
+    "cmake.sourceDirectory": "/home/emmog12/Bureau/TicTacToeClient/Libraries/raylib"
 }

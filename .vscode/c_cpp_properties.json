@@ -7,10 +7,10 @@
                 "${workspaceFolder}/Libraries/raylib/src"
             ],
             "windowsSdkVersion": "10.0.26100.0",
-            "compilerPath": "cc",
+            "compilerPath": "C:/ef/TicTacToeClient/Tools/w64devkit/bin/g++.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "gcc-x64"
+            "intelliSenseMode": "windows-gcc-x64"
         }
     ],
     "version": 4
