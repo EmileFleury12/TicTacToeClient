@@ -1,21 +1,11 @@
-#include "entrypoint.h"
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-
-#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <stdio.h>
-#include <iostream>
-#include <string>
 
 typedef int SOCKET;
 #define MAX_CLIENTS 2 * 4
 
-#define PORT_NUM "6969"
+#define PORT_NUM 6969
 int main(void){
     int s_res;
     struct addrinfo hints;
@@ -42,10 +32,10 @@ int main(void){
         if (bind(sock, rp->ai_addr, rp->ai_addrlen) == 0)
             break;                  /* Success */
         
-        listen(sock, LISTEN_BACKLOG);
+        listen(sock, LISTEN_BACKLOG)
     }
-    struct sockaddr client_addr[MAX_CLIENTS] = {0};
-    SOCKET client_socks[MAX_CLIENTS] = {0};
+    struct sockaddr client_addr[MAX_CLIENTS] = {0}
+    SOCKET client_socks[MAX_CLIENTS] = {0}
 
     client_socks[0] = accept(sock,&client_addr[0],sizeof(client_addr[0]));
 

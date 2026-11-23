@@ -4,61 +4,76 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <iphlpapi.h>
 #include <stdio.h>
 #include <iostream>
 #include <string>
-#include <_socket_types.h>
-
-typedef int SOCKET;
 
 #pragma comment(lib, "Ws2_32.lib")
 int iResult;
 
-int raylib_start(void)
+void raylib_start(void)
 {
+  WSADATA wsaData;
+
+  // Initialise Winsock
+  iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+  if (iResult != 0)
+  {
+    printf("WSAStartup failed: %d\n", iResult);
+  }
 
 #define DEFAULT_PORT "80"
 
   struct addrinfo *result = NULL, *ptr = NULL, hints;
 
-  memset(&hints, 0, sizeof(hints));
+  ZeroMemory(&hints, sizeof(hints));
   hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_protocol = IPPROTO_TCP;
   hints.ai_flags = AI_PASSIVE;
 
+  // Déterminer l'adresse locale et le port devant être utilisés par le serveur
   iResult = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result);
   if (iResult != 0)
   {
     printf("getaddrinfo failed: %d\n", iResult);
+    WSACleanup();
   }
 
-  SOCKET ListenSocket;
+  SOCKET ListenSocket = INVALID_SOCKET;
+
+  // Créer un socket permettant au serveur d'être à l'écoute des connexions des clients
 
   ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
 
-  if (ListenSocket == -1)
+  if (ListenSocket == INVALID_SOCKET)
   {
-    printf("Error at socket(): %ld\n");
+    printf("Error at socket(): %ld\n", WSAGetLastError());
     freeaddrinfo(result);
+    WSACleanup();
   }
 
+  // Configurer le socket d'écoute TCP
   iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
-  if (iResult == -1)
+  if (iResult == SOCKET_ERROR)
   {
-    printf("bind failed with error: %d\n");
+    printf("bind failed with error: %d\n", WSAGetLastError());
     freeaddrinfo(result);
+    closesocket(ListenSocket);
+    WSACleanup();
   }
 
   freeaddrinfo(result);
 
-  if (listen(ListenSocket, SOMAXCONN) == -1)
+  if (listen(ListenSocket, SOMAXCONN) == SOCKET_ERROR)
   {
-    printf("Listen failed with error: %ld\n");
+    printf("Listen failed with error: %ld\n", WSAGetLastError());
+    closesocket(ListenSocket);
+    WSACleanup();
   }
 
   SOCKET ClientSocket;
@@ -69,8 +84,13 @@ int raylib_start(void)
   ClientSocket = accept(ListenSocket, NULL, NULL);
   if (ClientSocket == INVALID_SOCKET)
   {
-    printf("accept failed: %d\n");
+    printf("accept failed: %d\n", WSAGetLastError());
+    closesocket(ListenSocket);
+    WSACleanup();
   }
+
+  // Le socket serveur n’est plus nécessaire
+  closesocket(ListenSocket);
 
 #define DEFAULT_BUFLEN 512
 
@@ -113,6 +133,8 @@ int raylib_start(void)
     else
       std::cout << "Methode inconnue\n";
   }
+
+  closesocket(ClientSocket);
 
   /*int iSendResult;
   int recvbuflen = DEFAULT_BUFLEN;

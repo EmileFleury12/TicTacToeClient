@@ -14,7 +14,7 @@
 
 int iResult;
 
-int raylib_start(void)
+void raylib_start(void)
 {
   WSADATA wsaData;
 
